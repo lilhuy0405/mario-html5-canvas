@@ -4,6 +4,12 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 console.log(ctx)
 const gravity = 1;
+//helper functions
+const createImage = (src) => {
+  const image = new Image();
+  image.src = src;
+  return image;
+}
 
 //TODO: separate this into a file
 class Player {
@@ -17,17 +23,51 @@ class Player {
       x: 0,
       y: 0
     }
-    this.width = 30;
-    this.height = 30;
+    this.width = 66;
+    this.height = 150;
     this.speed = 5;
+    this.image = createImage("img/spriteStandRight.png")
+    this.frame = 0;
+
+    this.sprites = {
+      stand: {
+        right: createImage("img/spriteStandRight.png"),
+        left: createImage("img/spriteStandLeft.png"),
+        cropWidth: 177,
+        width: 66,
+      },
+      run: {
+        right: createImage("img/spriteRunRight.png"),
+        left: createImage("img/spriteRunLeft.png"),
+        cropWidth: 340,
+        width: 127.875
+      }
+    }
+
+    this.currentSprite = this.sprites.stand.right;
+    this.currentSpriteCropWidth = 177
   }
 
   draw() {
-    ctx.fillStyle = 'red';
-    ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+    ctx.drawImage(
+      this.currentSprite,
+      this.currentSpriteCropWidth * this.frame,
+      0,
+      this.currentSpriteCropWidth,
+      400,
+      this.position.x,
+      this.position.y,
+      this.width,
+      this.height);
   }
 
   update() {
+    this.frame++;
+    if (this.frame > 59 && (this.currentSprite === this.sprites.stand.right || this.currentSprite === this.sprites.stand.left)) {
+      this.frame = 0;
+    } else if (this.frame > 29 && (this.currentSprite === this.sprites.run.right || this.currentSprite === this.sprites.run.left)) {
+      this.frame = 0;
+    }
     this.draw()
     this.position.y += this.velocity.y;
     this.position.x += this.velocity.x;
@@ -56,8 +96,7 @@ class Platform {
     }
     this.width = data.width;
     this.height = data.height;
-    this.image = new Image();
-    this.image.src = data.image;
+    this.image = createImage(data.image);
   }
 
   draw() {
@@ -72,8 +111,7 @@ class Background {
       y: data.y
     }
 
-    this.image = new Image();
-    this.image.src = data.image;
+    this.image = createImage(data.image);
     this.width = data.width || this.image.width;
     this.height = data.height || this.image.height;
   }
@@ -254,10 +292,16 @@ window.addEventListener('keydown', function (event) {
       keys['ArrowDown'] = true;
       break;
     case 'ArrowLeft':
+      player.currentSprite = player.sprites.run.left;
+      player.currentSpriteCropWidth = player.sprites.run.cropWidth;
+      player.width = player.sprites.run.width;
       keys['ArrowLeft'] = true;
       break;
     case 'ArrowRight':
       keys['ArrowRight'] = true;
+      player.currentSprite = player.sprites.run.right;
+      player.currentSpriteCropWidth = player.sprites.run.cropWidth;
+      player.width = player.sprites.run.width;
       break;
   }
 })
@@ -266,9 +310,15 @@ window.addEventListener('keyup', function (event) {
   switch (event.code) {
     case 'ArrowLeft':
       keys['ArrowLeft'] = false;
+      player.currentSprite = player.sprites.stand.left;
+      player.currentSpriteCropWidth = player.sprites.stand.cropWidth;
+      player.width = player.sprites.stand.width;
       break;
     case 'ArrowRight':
       keys['ArrowRight'] = false;
+      player.currentSprite = player.sprites.stand.right;
+      player.currentSpriteCropWidth = player.sprites.stand.cropWidth;
+      player.width = player.sprites.stand.width;
       break;
   }
 })
