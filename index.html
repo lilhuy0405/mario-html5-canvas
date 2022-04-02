@@ -6,6 +6,7 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Mario</title>
+    <script src="//mrdoob.github.io/stats.js/build/stats.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -21,14 +22,57 @@
             align-items: center;
             background: pink;
         }
+
         canvas {
             border: 1px solid black;
         }
+
+        @media (max-width: 1000px) {
+            canvas {
+                width: 100vw;
+                height: 100vh;
+            }
+        }
+
+        button {
+            padding: 10px 20px;
+            user-select: none;
+        }
+
+        button#left {
+            position: absolute;
+
+
+            bottom: 0px;
+            right: 70px;
+        }
+
+        button#right {
+            position: absolute;
+            bottom: 0px;
+            right: 10px;
+        }
+
+        button#up {
+            position: absolute;
+            bottom: 50px;
+            right: 35px;
+        }
+
     </style>
 
 </head>
 <body>
+
 <canvas id="canvas" width="1000" height="700"></canvas>
+<button id="left"> <</button>
+<button id="right">
+    >
+</button>
+
+<button id="up">^</button>
+
+
 <script src="main.js"></script>
 </body>
 </html>

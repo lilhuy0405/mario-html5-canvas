@@ -1,8 +1,18 @@
 const canvas = document.getElementById('canvas');
-// canvas.width = window.innerWidth;
-// canvas.height = window.innerHeight;
 const ctx = canvas.getContext('2d');
-console.log(ctx)
+//setup stats
+const stats = new Stats();
+stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild(stats.dom);
+
+if(screen.availHeight > screen.availWidth){
+  alert("Please use Landscape!");
+}
+
+const upBtn = document.getElementById('up');
+const leftBtn = document.getElementById('left');
+const rightBtn = document.getElementById('right');
+
 const gravity = 1;
 //helper functions
 const createImage = (src) => {
@@ -11,7 +21,7 @@ const createImage = (src) => {
   return image;
 }
 
-//TODO: separate this into a file
+
 class Player {
   constructor() {
     this.position = {
@@ -39,7 +49,7 @@ class Player {
       run: {
         right: createImage("img/spriteRunRight.png"),
         left: createImage("img/spriteRunLeft.png"),
-        cropWidth: 340,
+        cropWidth: 341,
         width: 127.875
       }
     }
@@ -63,12 +73,14 @@ class Player {
 
   update() {
     this.frame++;
+    //sprite sheet for stand has 59 frames and run has 29 frames
     if (this.frame > 59 && (this.currentSprite === this.sprites.stand.right || this.currentSprite === this.sprites.stand.left)) {
       this.frame = 0;
     } else if (this.frame > 29 && (this.currentSprite === this.sprites.run.right || this.currentSprite === this.sprites.run.left)) {
       this.frame = 0;
     }
     this.draw()
+    //handle movement
     this.position.y += this.velocity.y;
     this.position.x += this.velocity.x;
     if (this.position.y < 0) {
@@ -77,13 +89,9 @@ class Player {
     if (this.position.x < 0) {
       this.position.x = 0;
     }
-    if (this.position.x > canvas.width - this.width) {
-      this.position.x = canvas.width - this.width;
-    }
+
     if (this.position.y + this.height + this.velocity.y <= canvas.height) {
       this.velocity.y += gravity;
-    } else {
-      //this.velocity.y = 0;
     }
   }
 }
@@ -117,6 +125,7 @@ class Background {
   }
 
   draw() {
+    //background scroll
     if (this.position.x > canvas.width) {
       this.position.x = 0;
     }
@@ -129,11 +138,12 @@ class Background {
   }
 }
 
-
+//game logic
 const keys = {
   'ArrowLeft': false,
   'ArrowRight': false
 }
+
 
 let scrollOffset = 0;
 let platforms = [];
@@ -217,6 +227,7 @@ const init = () => {
 }
 
 function animate() {
+  stats.begin();
   const id = requestAnimationFrame(animate);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   //position is matter here need to drawl background first then player
@@ -229,7 +240,7 @@ function animate() {
   platforms.forEach(platform => {
     platform.draw();
   })
-  if (keys['ArrowRight'] && player.position.x <= 500) {
+  if (keys['ArrowRight'] && player.position.x <= canvas.width / 2) {
     player.velocity.x = 5;
 
   } else if (keys['ArrowLeft'] && player.position.x >= 100) {
@@ -255,6 +266,8 @@ function animate() {
       });
       scrollOffset -= player.speed;
     }
+
+
     if (scrollOffset > 2000) {
       alert('You win!')
       window.cancelAnimationFrame(id);
@@ -274,7 +287,7 @@ function animate() {
       player.velocity.y = 0;
     }
   })
-
+  stats.end();
 }
 
 init()
@@ -310,16 +323,56 @@ window.addEventListener('keyup', function (event) {
   switch (event.code) {
     case 'ArrowLeft':
       keys['ArrowLeft'] = false;
-      player.currentSprite = player.sprites.stand.left;
-      player.currentSpriteCropWidth = player.sprites.stand.cropWidth;
-      player.width = player.sprites.stand.width;
+      if (player.currentSprite === player.sprites.run.left) {
+        player.currentSprite = player.sprites.stand.left;
+        player.currentSpriteCropWidth = player.sprites.stand.cropWidth;
+        player.width = player.sprites.stand.width;
+      }
       break;
     case 'ArrowRight':
       keys['ArrowRight'] = false;
-      player.currentSprite = player.sprites.stand.right;
-      player.currentSpriteCropWidth = player.sprites.stand.cropWidth;
-      player.width = player.sprites.stand.width;
+      if (player.currentSprite === player.sprites.run.right) {
+        player.currentSprite = player.sprites.stand.right;
+        player.currentSpriteCropWidth = player.sprites.stand.cropWidth;
+        player.width = player.sprites.stand.width;
+      }
       break;
+  }
+})
+
+upBtn.addEventListener("touchstart", e => {
+  if (player.velocity.y === 0) {
+    player.velocity.y = -18;
+  }
+})
+
+leftBtn.addEventListener("touchstart", () => {
+  player.currentSprite = player.sprites.run.left;
+  player.currentSpriteCropWidth = player.sprites.run.cropWidth;
+  player.width = player.sprites.run.width;
+  keys['ArrowLeft'] = true;
+})
+leftBtn.addEventListener("touchend", () => {
+  keys['ArrowLeft'] = false;
+  if (player.currentSprite === player.sprites.run.left) {
+    player.currentSprite = player.sprites.stand.left;
+    player.currentSpriteCropWidth = player.sprites.stand.cropWidth;
+    player.width = player.sprites.stand.width;
+  }
+})
+
+rightBtn.addEventListener("touchstart", () => {
+  keys['ArrowRight'] = true;
+  player.currentSprite = player.sprites.run.right;
+  player.currentSpriteCropWidth = player.sprites.run.cropWidth;
+  player.width = player.sprites.run.width;
+})
+rightBtn.addEventListener("touchend", () => {
+  keys['ArrowRight'] = false;
+  if (player.currentSprite === player.sprites.run.right) {
+    player.currentSprite = player.sprites.stand.right;
+    player.currentSpriteCropWidth = player.sprites.stand.cropWidth;
+    player.width = player.sprites.stand.width;
   }
 })
 
