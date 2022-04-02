@@ -5,7 +5,7 @@ const stats = new Stats();
 stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild(stats.dom);
 
-if(screen.availHeight > screen.availWidth){
+if (screen.availHeight > screen.availWidth) {
   alert("Please use Landscape!");
 }
 
@@ -33,29 +33,29 @@ class Player {
       x: 0,
       y: 0
     }
-    this.width = 66;
-    this.height = 150;
+    this.width = 3480 / 60;
+    this.height = 115;
     this.speed = 5;
-    this.image = createImage("img/spriteStandRight.png")
+    this.image = createImage("img/standing-right.png")
     this.frame = 0;
 
     this.sprites = {
       stand: {
-        right: createImage("img/spriteStandRight.png"),
-        left: createImage("img/spriteStandLeft.png"),
-        cropWidth: 177,
-        width: 66,
+        right: createImage("img/standing-right.png"),
+        left: createImage("img/standing-left.png"),
+        cropWidth: 3480 / 60,
+        width: 3480 / 60,
       },
       run: {
-        right: createImage("img/spriteRunRight.png"),
-        left: createImage("img/spriteRunLeft.png"),
-        cropWidth: 341,
-        width: 127.875
+        right: createImage("img/run-right.png"),
+        left: createImage("img/run-left.png"),
+        cropWidth: 5445 / 60,
+        width: 5445 / 60
       }
     }
 
     this.currentSprite = this.sprites.stand.right;
-    this.currentSpriteCropWidth = 177
+    this.currentSpriteCropWidth = 3480 / 60
   }
 
   draw() {
@@ -64,7 +64,7 @@ class Player {
       this.currentSpriteCropWidth * this.frame,
       0,
       this.currentSpriteCropWidth,
-      400,
+      115,
       this.position.x,
       this.position.y,
       this.width,
@@ -74,9 +74,7 @@ class Player {
   update() {
     this.frame++;
     //sprite sheet for stand has 59 frames and run has 29 frames
-    if (this.frame > 59 && (this.currentSprite === this.sprites.stand.right || this.currentSprite === this.sprites.stand.left)) {
-      this.frame = 0;
-    } else if (this.frame > 29 && (this.currentSprite === this.sprites.run.right || this.currentSprite === this.sprites.run.left)) {
+    if (this.frame >= 60) {
       this.frame = 0;
     }
     this.draw()
@@ -240,7 +238,7 @@ function animate() {
   platforms.forEach(platform => {
     platform.draw();
   })
-  if (keys['ArrowRight'] && player.position.x <= canvas.width / 2) {
+  if (keys['ArrowRight'] && player.position.x < canvas.width / 2) {
     player.velocity.x = 5;
 
   } else if (keys['ArrowLeft'] && player.position.x >= 100) {
