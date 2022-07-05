@@ -51,6 +51,10 @@ class Player {
         left: createImage("img/run-left.png"),
         cropWidth: 5445 / 60,
         width: 5445 / 60
+      },
+      shuriken: {
+        right: createImage("img/throw-right.png"),
+        width: 58
       }
     }
 
@@ -64,7 +68,7 @@ class Player {
       this.currentSpriteCropWidth * this.frame,
       0,
       this.currentSpriteCropWidth,
-      115,
+      107,
       this.position.x,
       this.position.y,
       this.width,
@@ -73,7 +77,6 @@ class Player {
 
   update() {
     this.frame++;
-    //sprite sheet for stand has 59 frames and run has 29 frames
     if (this.frame >= 60) {
       this.frame = 0;
     }
@@ -136,10 +139,64 @@ class Background {
   }
 }
 
+class Shuriken {
+  constructor(data) {
+    this.position = {
+      x: data.x,
+      y: data.y
+    }
+    this.velocity = {
+      x: data.velocity.x,
+      y: data.velocity.y
+    }
+    this.acceleration = 1;
+    this.width = 950 / 20;
+    this.height = 50
+    this.image = createImage("img/shuriken.png")
+    this.cropWidth = 950 / 20
+    this.frame = 0;
+
+
+  }
+
+  draw() {
+    ctx.drawImage(
+      this.image,
+      this.cropWidth * this.frame,
+      0,
+      this.cropWidth,
+      this.height,
+      this.position.x,
+      this.position.y,
+      this.width,
+      this.height);
+  }
+
+
+  update() {
+
+    this.frame++;
+    if (this.frame >= 20) {
+      this.frame = 0;
+    }
+
+    this.position.x += this.velocity.x;
+    this.position.y += gravity;
+    //càng bay càng nhanh
+    if (this.velocity.x > 0) {
+      this.velocity.x += this.acceleration;
+    } else {
+      this.velocity.x -= this.acceleration;
+    }
+    this.draw()
+  }
+}
+
 //game logic
 const keys = {
   'ArrowLeft': false,
-  'ArrowRight': false
+  'ArrowRight': false,
+  'ArrowUp': false
 }
 
 
@@ -179,13 +236,13 @@ const init = () => {
     platforms.push(platform);
   }
 
-  const background = new Background({
-    x: -1,
-    y: -1,
-    width: canvas.width,
-    height: canvas.height,
-    image: "img/background.png"
-  });
+  // const background = new Background({
+  //   x: -1,
+  //   y: -1,
+  //   width: canvas.width,
+  //   height: canvas.height,
+  //   image: "img/background.png"
+  // });
 
   const clouds = [
     new Background({
@@ -214,7 +271,7 @@ const init = () => {
 
   ];
 
-  genericObjs = [background, ...clouds]
+  genericObjs = [...clouds]
   staticObject = new Background({
     x: 30,
     y: 30,
@@ -223,6 +280,10 @@ const init = () => {
     image: "img/sun.png"
   });
 }
+
+
+//game loop
+const shurikens = []
 
 function animate() {
   stats.begin();
@@ -234,9 +295,13 @@ function animate() {
   });
   staticObject.draw();
   player.update();
-
+  //shuriken.velocity.x += 5;
   platforms.forEach(platform => {
     platform.draw();
+  })
+
+  shurikens.forEach(shuriken => {
+    shuriken.update();
   })
   if (keys['ArrowRight'] && player.position.x < canvas.width / 2) {
     player.velocity.x = 5;
@@ -335,6 +400,29 @@ window.addEventListener('keyup', function (event) {
         player.width = player.sprites.stand.width;
       }
       break;
+    case 'Space':
+      let shuriken;
+      if (player.currentSprite === player.sprites.stand.right ||
+        player.currentSprite === player.sprites.run.right) {
+        shuriken = new Shuriken({
+          x: player.position.x + player.width / 2,
+          y: player.position.y + player.height / 2,
+          velocity: {
+            x: 5,
+          }
+        })
+      } else if (player.currentSprite === player.sprites.stand.left ||
+        player.currentSprite === player.sprites.run.left) {
+        shuriken = new Shuriken({
+          x: player.position.x + player.width / 2,
+          y: player.position.y + player.height / 2,
+          velocity: {
+            x: -5,
+          }
+        })
+      }
+      shurikens.push(shuriken);
+      break;
   }
 })
 
@@ -373,4 +461,5 @@ rightBtn.addEventListener("touchend", () => {
     player.width = player.sprites.stand.width;
   }
 })
+
 
